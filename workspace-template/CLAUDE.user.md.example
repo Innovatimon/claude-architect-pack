@@ -1,0 +1,106 @@
+# CLAUDE.user.md — Deine persoenlichen Anpassungen
+
+> **Diese Datei wird bei Updates NIE ueberschrieben.** Sie ist dein
+> persoenlicher Override-Layer, der parallel zu `CLAUDE.md` gelesen wird.
+>
+> Du kannst diese Datei beliebig erweitern: Projekt-Listen, Server-Zugaenge
+> (NUR Pfade — keine Werte!), Notion-IDs, Stil-Praeferenzen, deine eigenen
+> Regeln, alles was du willst.
+>
+> Kopiere dieses File zu `CLAUDE.user.md` (ohne `.example`) und passe es an.
+
+---
+
+## Persoenliches Profil
+
+- **Name:** [Dein Name]
+- **Rolle:** [Software Engineer / Founder / Researcher / ...]
+- **Sprache:** Deutsch / English / ... (in dieser Sprache antwortet der Agent)
+- **Stil:** [z.B. "kurz und direkt", "viele Beispiele", "ohne Emoji"]
+
+## Doktrin-Overrides
+
+> Hier kannst du die Defaults aus `CLAUDE.md` abschwaechen oder verschaerfen.
+
+- [ ] Vor `git push` IMMER bestaetigen lassen
+- [ ] Vor Deploy IMMER auf Production-Branch checken
+- [ ] Niemals `npm install <neues-paket>` ohne Bestaetigung
+- [ ] Niemals destruktive Bash-Befehle (rm -rf, force-push) ohne Bestaetigung
+
+Eigene Regeln hier eintragen — der Agent liest sie als Erweiterung.
+
+## Meine Projekte
+
+| Projekt | Ordner | Was es ist | Status |
+|---------|--------|------------|--------|
+| _Beispiel: MyShop_ | _Projekte/MyShop/_ | _E-Commerce in Niche X_ | _AKTIV_ |
+
+## Server / Infrastruktur
+
+> NUR Pfade und Hostnames. Werte (Passwords, API-Keys) gehoeren NIE in diese Datei.
+
+- **SSH:** `ssh meinserver` (siehe `~/.ssh/config`)
+- **Server-Doku:** `~/secure/server-credentials.md` (NICHT in git)
+- **Production-URL:** `https://example.com`
+
+## External Sources
+
+> Welche externen Systeme der Orchestrator/audit-creator lesen soll.
+
+```yaml
+audit_source:
+  type: notion  # oder: github_issues, linear, trello, markdown_inbox
+  database_id: YOUR_NOTION_DB_ID
+  filter: status=open
+  # MCP-Server muss konfiguriert sein
+
+# alternativ:
+# audit_source:
+#   type: markdown_inbox
+#   path: _schriftbuero/Inbox/
+```
+
+## GitHub
+
+- **Account:** `your-github-username`
+- **Default-Org / Account fuer neue Repos:** _hier eintragen_
+
+## Memory-Pfad
+
+```
+~/.claude/projects/<workspace-encoded>/memory/
+```
+
+## Eigene Skills / Runbooks
+
+Wenn du eigene Skills baust:
+- Globale: `~/.claude/skills/<name>/SKILL.md`
+- Lokale (nur dieser Workspace): `.claude/skills/<name>/SKILL.md` ← Workspace-Root
+- Nicht in `_runbooks/custom-*.md` namensueberlapp mit Template-Runbooks
+  (siehe MANIFEST.yml `user_owned`)
+
+## Eigene Modi
+
+Wenn du z.B. einen "Spaeher-Modus", "Marketing-Modus", "Skript-Doktor-Modus" willst,
+beschreibe ihn hier:
+
+```
+## Modus: Spaeher
+
+Sage "Spaeher-Modus aktivieren" oder "spaeh".
+
+In diesem Modus:
+- Nur Read-Operations (kein Edit/Write/Bash mit Side-Effects)
+- Bericht-Format: 5 Bullets + 1 Empfehlung
+- Maximum 30 Tool-Calls pro Run
+```
+
+## Notizen
+
+Alles was sonst noch nirgends reinpasst.
+
+---
+
+> **Tipp:** Wenn deine `CLAUDE.user.md` zu lang wird, lager Sub-Bereiche in
+> `_user-overrides/<topic>.md` aus und referenziere sie hier. `_user-overrides/`
+> wird vom Update ebenfalls nie angefasst.

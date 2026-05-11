@@ -1,0 +1,71 @@
+# Manifest — was beim Update ueberschrieben wird vs. user-owned bleibt
+#
+# Wird von `update-architect-pack` ausgewertet.
+# Files unter `template_managed:` werden bei Updates immer aus dem Repo-Stand
+# uebernommen. Files / Verzeichnisse unter `user_owned:` werden NIE
+# angefasst, auch wenn das Repo eine neue Version mitbringt.
+
+version: 1
+schema: claude-architect-pack
+last_updated: 2026-05-11
+
+# Files die der Updater immer ueberschreibt (Template-Stand ist Wahrheit)
+template_managed:
+  # CLAUDE.md ist das Template — wird mit jedem Update aktualisiert
+  - CLAUDE.md
+
+  # Alle Runbooks werden gepflegt
+  - _runbooks/INDEX.md
+  - _runbooks/agent-initialisierung.md
+  - _runbooks/runbook-erstellen.md
+  - _runbooks/user-anleitungen-erstellen.md
+  - _runbooks/welle-orchestration.md
+  - _runbooks/neues-projekt-erstellen.md
+  - _runbooks/schriftbuero-erstellen.md
+  - _runbooks/schriftbuero-konsolidieren.md
+  - _runbooks/memory-pflege.md
+  - _runbooks/multi-worker-coordination.md
+  - _runbooks/file-operations-windows.md
+  - _runbooks/arbeitsweise-notion.md
+  - _runbooks/workspace-audit.md
+
+  # Control-Layer Templates
+  - _control/CLAUDE.md
+  - _control/templates/status-template.md
+  - _control/templates/audit-template.md
+
+  # Skills (im Claude-Skill-Dir, nicht im Workspace)
+  - skills/autonomous-execution/SKILL.md
+  - skills/audit-creator/SKILL.md
+  - skills/audit-worker/SKILL.md
+  - skills/cleanup-after-welle/SKILL.md
+  - skills/project-setup/SKILL.md
+  - skills/init-architect-pack/SKILL.md
+  - skills/update-architect-pack/SKILL.md
+
+# Files / Verzeichnisse die User-Owned sind (Update fasst sie nie an)
+user_owned:
+  # User-Override fuer CLAUDE.md — DER zentrale Customization-Punkt
+  - CLAUDE.user.md
+
+  # Beliebige Custom-Files
+  - _user-overrides/**
+
+  # Memory ist privat
+  - ~/.claude/projects/**/memory/**
+
+  # User-eigene Runbooks (nicht im template_managed)
+  - _runbooks/custom-*.md
+  - _runbooks/local-*.md
+
+  # User-Projekte
+  - Projekte/**
+  - projects/**
+
+  # User-eigene Skills (die nicht aus diesem Pack stammen)
+  - .claude/skills/* # ausser den 7 aus template_managed (Update prueft Name)
+
+# Diese Files duerfen aus dem Workspace komplett verschwinden wenn Update
+# sie aus dem Template entfernt (Cleanup von Legacy-Files):
+deprecated_remove:
+  []  # Aktuell keine Deprecations

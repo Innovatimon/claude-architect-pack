@@ -1,0 +1,34 @@
+# Local installer artifacts
+*.local.md
+*.local.json
+
+# Backup files
+*.bak
+*.orig
+*.swp
+*~
+
+# OS-specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.code-workspace
+
+# Logs
+*.log
+
+# Test artifacts
+test-output/
+*.tmp
+
+# Anything that looks like a secret should never enter this repo
+**/.env
+**/.env.local
+**/credentials.json
+**/secrets.json
+**/*-secret.*
+**/*-private.*
