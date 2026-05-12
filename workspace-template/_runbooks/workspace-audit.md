@@ -1,146 +1,147 @@
-# Runbook: Workspace-Audit (Multi-Agent-Discovery)
+# Runbook: Workspace-Audit
 > Klassifikation: L2
+> Stand: 2026-05-12
 
 > **Trigger:** "Workspace auditieren", "Architektur pruefen", "Doku-Konsistenz", "Lies dich ganz ein und auditiere", "Drift-Check", "Master-Konsolidierung starten"
+>
+> **Zielbild:** Vollstaendiger Workspace-Snapshot nach 6-Agenten-Discovery-Pattern + Synthese + Fragenkatalog fuer den User. Outcome: belastbare Inventur + priorisierte Aktions-Liste + Strategische Fragen an den User.
 
-## Wann ein Workspace-Audit?
+---
 
-- Workspace ueber mehrere Monate gewachsen, Doku driftet
-- Neuer Agent uebernimmt, will Stand verstehen
-- Vor groesserer Konsolidierungs-Welle
-- Nach grossem Refactor / Workspace-Move
-- Periodisch (z.B. quartalsweise)
+## Wann anwenden
+- Vor jeder Master-Konsolidierung.
+- 1x pro Quartal als Hygiene.
+- Wenn der User "alles ist drift, was geht noch" sagt.
+- Vorgangs-Vorlage: Phase 1 der Master-Konsolidierung 2026-05 (siehe Initiator
+  `_schriftbuero/Kontinuitaet/2026-05-11-Master-Konsolidierung-Initiator.md`).
 
-## Was prueft ein Workspace-Audit?
+## Voraussetzungen
+- Architekt-Modus (du selbst), nicht delegieren.
+- 6 parallele Sub-Agenten (`Explore`-Typ fuer Read-Only-Inventur).
+- ~2-3h Zeitbudget fuer die Discovery, dann Synthese in 1h.
 
-- **Doku-Konsistenz:** CLAUDE.md, MEMORY.md, Runbook-Index — alle Pointer auf existierende Files?
-- **Pfad-Drift:** Files an alten Pfaden noch referenziert?
-- **Stale STATUS.md:** Projekte als "AKTIV" markiert mit STATUS.md > 30 Tage alt?
-- **Memory-Drift:** Memory-Files referenzieren Projekte/Pfade die nicht mehr existieren?
-- **Skill-Drift:** Skill-Files referenzieren Runbooks die nicht mehr existieren?
-- **Live-vs-Doku-Drift:** Workspace-Doku sagt "Service X laeuft auf Port Y", aber Server-Reality zeigt was anderes?
-- **Secret-Leaks:** API-Keys / Passwords in Doku-Files?
-- **Duplikat-Files:** Zwei Files mit gleichem Topic?
+---
 
-## Multi-Agent-Discovery-Pattern (6 Agents)
+## Phase 1 — Discovery (6 parallele Sub-Agenten)
 
-Statt seriell durchzuarbeiten: 6 parallele Agents mit disjunkten Themen.
+> **Pflicht-Prompt-Prefix fuer ALLE 6 Sub-Agenten:** `Aktiviere Skill thinkLikeUser sofort. Working Directory: C:\Users\YourUser\.YourWorkspace\.` Sonst arbeiten Discovery-Agenten ohne User-Persona — Audits werden neutral statt im Architekt-Stil bewertet. Skill-Pfad: `~/.claude/skills/thinkLikeUser/`.
 
-### Agent 1 — Doku-Konsistenz
-- Liest alle `CLAUDE.md` (Workspace + Projekte)
-- Liest `_runbooks/INDEX.md` + alle Runbooks
-- Liest `MEMORY.md` + alle Memory-Files
-- Findet: Pointer auf nicht-existente Files, Doppel-Refs, Duplikat-Topics
+Spawne in EINER Message 6 `Explore`-Agenten parallel. Pro Agent ein klar
+abgegrenzter Scope, Read-only, Output: strukturierter Markdown-Report
+(max 800 Woerter).
 
-### Agent 2 — Status-Frische
-- Liest jedes `STATUS.md` und `MASTER-STATE.md`
-- Pruefst `Stand: <datum>` Header
-- Stale: > 14 Tage und Projekt "AKTIV" -> Drift-Flag
+### Agent A — Schriftbuero-Inventar
+- Scope: `_schriftbuero/`, `Projekte/MultiBrandShops/_schriftbuero/`,
+  `Projekte/ProjectZeta/ProjectEpsilon/_schriftbuero/`, jedes weitere `_schriftbuero/`
+- Output: Pro Schriftbuero: Struktur (Ordner), Inbox-Alter,
+  Briefings-Liste, offene Antworten, Initiatoren, Templates.
+- Markiere: Drift (alte Inbox-Files, fehlende Ordner, broken Templates).
 
-### Agent 3 — Memory-Audit
-- Geht alle Memory-Files durch
-- Pruefst Frontmatter (name, description, type)
-- Pruefst `Stand: <datum>` falls vorhanden
-- Findet: Phantom-Pointer aus MEMORY.md, Files ohne Pointer, Duplikat-Topics
+### Agent B — Skills + Runbooks Audit
+- Scope: `~/.claude/skills/*/SKILL.md`, `_runbooks/*.md`,
+  `_runbooks/INDEX.md`, `_control/skills/` falls vorhanden.
+- Output: Pro Skill/Runbook: Klassifikation (L1-L7), Frontmatter-Status,
+  Trigger-Phrasen, Doppelungen, obsolete Eintraege.
+- Markiere: Skill-vs-Runbook-Redundanzen, fehlende INDEX-Eintraege,
+  fehlende L-Klassifikation.
 
-### Agent 4 — Live-vs-Doku
-- Wenn Workspace mit Server arbeitet: SSH + Services + Container-Tags abgleichen mit Doku
-- Wenn nur lokal: `git status` in allen Projekten, Build-Stand pruefen
+### Agent C — STATUS + VISION pro Projekt
+- Scope: Alle Projekte aus Root-CLAUDE.md.
+- Pro Projekt Read: `STATUS.md`, `VISION.md`, `CLAUDE.md`.
+- Output: Tabelle Projekt | STATUS-Datum | VISION-Datum | CLAUDE-Datum |
+  Drift-Marker.
+- Markiere: Fehlende Files, Files >7 Tage alt, Widersprueche zur
+  Root-CLAUDE.md-Projekt-Tabelle.
 
-### Agent 5 — Secret-Scan
-- Grep ueber alle `.md`, `.json`, `.yaml`, `.toml`, `.env*` Files
-- Patterns: `sk_live_`, `ghp_`, `pk_`, `Bearer `, `password:`, `api_key`, `secret`
-- Findet: geleakte Credentials (Pflicht-Cleanup wenn gefunden!)
+### Agent D — Memory-Audit
+- Scope: `~/.claude/projects/C--Users-TuT-Admin--YourWorkspace/memory/`.
+- Output: Pro File: KEEP / UPDATE / MERGE / DELETE-Empfehlung mit
+  Begruendung. Cross-Check MEMORY.md-Index vs Filesystem vs
+  CLAUDE.md-Block.
+- Markiere: Stale (>3 Monate, gestrichenes Projekt), Doppelungen,
+  fehlende Index-Eintraege.
 
-### Agent 6 — Skill-Audit
-- Liest `~/.claude/skills/*/SKILL.md`
-- Pruefst ob Trigger-Worte aktuell sind
-- Pruefst ob referenzierte Pfade/Runbooks existieren
-- Findet: tote Skills, Drift-Pointer
+### Agent E — _control + CLAUDE.md
+- Scope: `_control/`, alle `CLAUDE.md` im Workspace (Root + 19+
+  Projekt-CLAUDE.md).
+- Output: Pro File: Datums-Header, Konsistenz mit Realitaet, L-Klassifikation,
+  doppelte Doktrin-Sektionen.
+- Markiere: Tote `_control/projects/*.md` (gestrichene Projekte),
+  fehlende Project-Files fuer aktive Projekte, GitHub-User-Konflikt,
+  fehlende L-Klassifikation in Projekt-CLAUDE.md.
 
-## Schritt-fuer-Schritt
+### Agent F — Meta-Architektur
+- Scope: Alle aus A-E + Top-Doktrin in CLAUDE.md, Umlaut-Regel,
+  Klassifikations-Hierarchie.
+- Output: Wie viele Stellen definieren dieselbe Regel? Wo gibt es
+  Single-Source-Verletzungen? Was kann auf Pointer reduziert werden?
+- Markiere: Doktrin-Doppelungen (Top-Doktrin, Umlaut-Pflicht, L1-L7,
+  Cleanup-Pflicht).
 
-### 1. Vor-Audit-Recon (Lead)
+---
 
-```bash
-# Workspace-Groesse
-find . -type f -name "*.md" | wc -l
-find . -type d -name "_archive" | wc -l
-git log --oneline -10
+## Phase 2 — Synthese (Architekt selbst)
+
+Lies alle 6 Reports. Erstelle in einer Session:
+
+### 2.1 Inventur-Datei
+Pfad: `_schriftbuero/Briefings/<YYYY-MM-DD>-workspace-audit-inventur.md`.
+Inhalt:
+- Executive Summary (5 Bullets)
+- Pro Discovery-Agent: Highlights + Drift-Liste
+- Cross-Cutting-Findings (was tauchte in mehreren Reports auf)
+- Quick-Wins (sofort fixbar) vs Strategic-Items (User-Input noetig)
+
+### 2.2 Fragenkatalog
+Pfad: `_schriftbuero/Fragenkataloge/<YYYY-MM-DD>-<thema>.md`.
+Vorlage / Goldstandard: `_schriftbuero/Fragenkataloge/2026-05-08-master-konsolidierung.md`.
+
+Struktur:
+- 8-12 strategische Fragen an den User.
+- Pro Frage: Architekt-Empfehlung (A/B/C) + Begruendung.
+- Anhang: Discovery-Reports als gekuerzte Snapshots.
+
+### 2.3 Initiator fuer Phase 2
+Pfad: `_schriftbuero/Kontinuitaet/<YYYY-MM-DD>-<thema>-Initiator.md`.
+Goldstandard: `_schriftbuero/Kontinuitaet/2026-05-11-Master-Konsolidierung-Initiator.md`.
+- Welle-Plan mit Sub-Agenten-Aufteilung.
+- Stop-Punkte definiert.
+- Verifikations-Hardtests am Ende.
+
+---
+
+## Phase 3 — Uebergabe
+
+Im Chat:
+```
+Workspace-Audit abgeschlossen.
+- 6 Discovery-Agents gelaufen, Reports in <Pfad>.
+- Inventur: <Pfad>
+- Fragenkatalog: <Pfad>  (X Fragen, davon Y mit Architekt-Default)
+- Initiator: <Pfad>
+- Empfehlung: <warten auf User-Antworten | Architekt-Defaults starten>
 ```
 
-### 2. Tasks anlegen pro Agent
-
-```
-TaskCreate "Workspace-Audit Agent 1 — Doku-Konsistenz"
-TaskCreate "Workspace-Audit Agent 2 — Status-Frische"
-TaskCreate "Workspace-Audit Agent 3 — Memory-Audit"
-TaskCreate "Workspace-Audit Agent 4 — Live-vs-Doku"
-TaskCreate "Workspace-Audit Agent 5 — Secret-Scan"
-TaskCreate "Workspace-Audit Agent 6 — Skill-Audit"
-```
-
-### 3. Agents spawnen (parallel)
-
-`Agent` Tool, 6 Calls in einer Message:
-- subagent_type: Explore (read-only) oder general-purpose
-- run_in_background: true
-- prompt: vollstaendig self-contained pro Agent
-
-### 4. Berichte sammeln
-
-Pro Agent ein Bericht in `_archive/<datum>-workspace-audit/agent-<N>-bericht.md`.
-
-Format:
-```markdown
-# Agent <N> — <Thema> — <Datum>
-
-## Findings
-- Finding 1 (P0/P1/P2): <Beschreibung> + Datei:Line + Reproduktion
-- ...
-
-## Top-5 Empfehlungen
-- ...
-
-## 200-Wort-Zusammenfassung
-```
-
-### 5. Lead-Konsolidierung
-
-Pro Bericht durchsehen, in EINE Master-Audit-Datei konsolidieren:
-- `_archive/<datum>-workspace-audit/MASTER-AUDIT-FINAL.md`
-- Executive Summary (Top-10 Drifts)
-- P0 → P3 nach Prioritaet
-- Empfohlene Konsolidierungs-Welle
-
-### 6. Konsolidierungs-Welle planen
-
-Aus dem Master-Audit eine konkrete Welle ableiten (siehe `welle-orchestration.md`):
-- Phase A = P0-Fixes (Secret-Leaks, falsche Pfade, broken Skills)
-- Phase B = P1-Fixes (Stale STATUS, Memory-Drift)
-- Reviewer = Lead-self mit erneutem 6-Agent-Audit
+---
 
 ## Verifizieren
+- [ ] 6 Discovery-Reports liegen vor (in `Tasks`-Output oder Schriftbuero)
+- [ ] Inventur-Datei existiert
+- [ ] Fragenkatalog existiert mit >=8 Fragen
+- [ ] Initiator existiert mit Welle-Plan
+- [ ] Im Chat klare Naechster-Schritt-Empfehlung
 
-- [ ] 6 Agent-Berichte vorhanden
-- [ ] MASTER-AUDIT-FINAL.md geschrieben
-- [ ] Konkrete Konsolidierungs-Welle vorgeschlagen
-- [ ] Falls Secret-Leak: SOFORT ACT-File geschrieben (P0)
-- [ ] Memory-Update fuer "letzter Workspace-Audit: <datum>"
+## Run-Log
 
-## Boundaries
+> **Pflicht-Touchpoint.** Jeder Agent der dieses Runbook nutzt ergaenzt EINE Zeile — neueste oben, max 8 (aelteste raus). Outcome-Codes: `PASS` (lief glatt, nichts geaendert) · `PARTIAL` (lief, aber etwas war anders — Notiz!) · `FIX` (Runbook stimmte nicht, korrigiert) · `META` (nur am Runbook editiert, nicht ausgefuehrt). Doktrin: `CLAUDE.md` "Navigations-Doktrin", `_runbooks/struktur-navigieren.md` Sektion 6.
 
-- Audit-Agents sind read-only — sie schreiben nur Berichte, kein Code-Edit.
-- Pro Agent disjunktes Thema — keine Cross-Reads.
-- Bei Funden NICHT direkt fixen — alles in den Master-Audit, dann strukturierte Welle.
+| Datum | Agent / Welle | Outcome | Notiz (was war anders / was wurde am Runbook geaendert) |
+|-------|---------------|---------|---------------------------------------------------------|
+| 2026-05-12 | Runbook-Mitlern-Welle | META | ## Run-Log nachgeruestet (Mitlern-Standard). |
 
 ## Learnings
-
-### 6-Agent ist Sweet-Spot
-Mehr Agents -> Themen-Overlap, doppelte Findings. Weniger -> Themen zu breit, oberflaechlich.
-
-### Secret-Scan ist Pflicht
-Jeder Workspace-Audit MUSS Secret-Scan enthalten. Findings = P0 mit sofortiger ACT.
-
-### Workspace-Audit als Vor-Konsolidierungs-Schritt
-Niemals direkt eine "Cleanup-Welle" starten ohne erst zu wissen WO die Drifts sind. Audit kostet 30-45 Min, sparte in der Realitaet mehrere Stunden Fehler-Suche.
+- **6 Agenten parallel ist Sweet-Spot.** Weniger = Lueck​en, mehr = Redundanz.
+- **Synthese ist Architekt-Pflicht.** Agenten liefern Material, nicht Entscheidungen.
+- **Fragenkatalog vor Welle.** User-Input verhindert Halluzination in Phase 2.
+- **Goldstandard kopieren statt frei schreiben.** Vorlage 2026-05-08 ist getestet.
+- Aktivieren erfolgt typischerweise zusammen mit `_runbooks/memory-pflege.md` (Memory ist Teil von Agent D) und `_runbooks/schriftbuero-konsolidieren.md` (Cleanup nach Audit).

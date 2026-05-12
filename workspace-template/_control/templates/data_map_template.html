@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daten-Map: {{PROJECT_NAME}}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #e9e9f1;
+    min-height: 100vh;
+    padding: 24px;
+    line-height: 1.5;
+  }
+  .container { max-width: 1400px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 32px; }
+  h1 {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, #6db5ff, #b18bff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle { color: #9ca3c5; font-size: 0.95rem; }
+  .pipeline {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 24px;
+  }
+  @media (min-width: 900px) {
+    .pipeline { grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+  }
+  .stage {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .stage:hover { transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.2); }
+  .stage h2 {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .stage .stage-desc {
+    font-size: 0.85rem;
+    color: #9ca3c5;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+  .stage-pantry h2 { color: #6db5ff; }
+  .stage-prep h2 { color: #ffc56d; }
+  .stage-plate h2 { color: #b18bff; }
+  .stage-icon {
+    display: inline-flex;
+    width: 32px; height: 32px;
+    align-items: center; justify-content: center;
+    border-radius: 8px;
+    font-size: 1.2rem;
+  }
+  .stage-pantry .stage-icon { background: rgba(109, 181, 255, 0.15); }
+  .stage-prep .stage-icon { background: rgba(255, 197, 109, 0.15); }
+  .stage-plate .stage-icon { background: rgba(177, 139, 255, 0.15); }
+  .items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .items li {
+    background: rgba(0, 0, 0, 0.25);
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+    font-size: 0.92rem;
+  }
+  .stage-pantry .items li { border-left-color: #6db5ff; }
+  .stage-prep .items li { border-left-color: #ffc56d; }
+  .stage-plate .items li { border-left-color: #b18bff; }
+  .items li.todo {
+    opacity: 0.7;
+    border-left-color: #ff6b8a !important;
+    font-style: italic;
+  }
+  .arrows {
+    display: none;
+    text-align: center;
+    color: #6db5ff;
+    font-size: 1.5rem;
+    margin: 0 -8px;
+    align-self: center;
+  }
+  @media (min-width: 900px) {
+    .pipeline.with-arrows {
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+    }
+    .arrows { display: block; }
+  }
+  footer {
+    margin-top: 40px;
+    text-align: center;
+    color: #6c7398;
+    font-size: 0.8rem;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: #9ca3c5;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Daten-Map: {{PROJECT_NAME}}</h1>
+      <p class="subtitle">Pantry &rarr; Prep &rarr; Plate Pipeline-Visualisierung</p>
+    </header>
+
+    <div class="pipeline">
+      <section class="stage stage-pantry">
+        <h2><span class="stage-icon">&#127859;</span> Pantry</h2>
+        <p class="stage-desc">Roh-Daten die ins System fliessen</p>
+        <ul class="items">
+{{PANTRY_ITEMS}}
+        </ul>
+      </section>
+
+      <section class="stage stage-prep">
+        <h2><span class="stage-icon">&#128293;</span> Prep</h2>
+        <p class="stage-desc">Verarbeitung, Cleaning, AI-Aufrufe, Embeddings</p>
+        <ul class="items">
+{{PREP_ITEMS}}
+        </ul>
+      </section>
+
+      <section class="stage stage-plate">
+        <h2><span class="stage-icon">&#127869;&#65039;</span> Plate</h2>
+        <p class="stage-desc">Was an Endnutzer / Stakeholder ausgeliefert wird</p>
+        <ul class="items">
+{{PLATE_ITEMS}}
+        </ul>
+      </section>
+    </div>
+
+    <footer>
+      <div>Generiert von <strong>generateProjectDataMap</strong> &middot; Stand: {{DATE}}</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#6db5ff"></span>Pantry (Input)</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#ffc56d"></span>Prep (Verarbeitung)</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#b18bff"></span>Plate (Output)</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#ff6b8a"></span>TODO: User klären</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

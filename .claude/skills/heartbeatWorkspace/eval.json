@@ -1,0 +1,13 @@
+{
+  "name": "heartbeatWorkspace",
+  "criteria": {
+    "alle_6_scans_durchgefuehrt": {"weight": 0.30, "description": "Stale-Audits, STATUS-Frische, Memory-Drift, Phantom-User-Anleitungen, Skill-Eval-Drift, Runbook-Mitlern-Drift alle gepruft"},
+    "bericht_speicherort": {"weight": 0.15, "description": "Bericht liegt unter _schriftbuero/Heartbeat/<YYYY-MM-DD-HHMM>.md"},
+    "read_only_kompliance": {"weight": 0.20, "description": "Keine Edits/Deletes ausgefuehrt — nur Reporting"},
+    "auto_fix_vorschlaege": {"weight": 0.15, "description": "Konkrete Vorschlaege mit Skill-/Runbook-Verweisen"},
+    "laufzeit_unter_60s": {"weight": 0.10, "description": "Cron-friendly, kein Hang"},
+    "keine_halluzination": {"weight": 0.10, "description": "Nur tatsaechlich gefundene Files reportet"}
+  },
+  "scoring": "0-1 pro Kriterium. Total = Summe(weight*score).",
+  "thresholds": {"pass": 0.85, "warn": 0.70, "fail_below": 0.70}
+}

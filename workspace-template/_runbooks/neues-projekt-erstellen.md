@@ -1,169 +1,189 @@
 # Runbook: Neues Projekt erstellen
 > Klassifikation: L2
+> Stand: 2026-05-12
 
-> **Trigger:** "neues Projekt", "Projekt anlegen", "bootstrappen", "leg X als Projekt an"
+> **Trigger:** "neues Projekt", "Projekt anlegen", "bootstrappen", "wir machen ein neues Ding", "leg <X> als Projekt an"
 
-## Schritt-fuer-Schritt (8 Schritte)
+## Kontext
 
-### 1. L-Klassifikation festlegen
+Im YourWorkspace bekommt jedes neue Projekt eine standardisierte Struktur
+mit 5 Kern-Dateien (CLAUDE.md, VISION.md, STATUS.md, PROJECT.md, SETUP.md), wird
+in der Root-`CLAUDE.md`-Tabelle eingetragen und (optional) in der Memory verewigt.
+Dieses Runbook beschreibt die Schritte fuer Architekt + Worker.
 
-Welche Ebene? (Details: `CLAUDE.md` Sektion "Klassifikations-Hierarchie")
+## Schritte
 
-| Trifft das Projekt zu? | Ebene | Pfad |
-|------------------------|-------|------|
-| System / Daemon / OS-Tool | L4 | `_system/<name>/` |
-| Framework / Multi-Brand-Plattform | L5 | `Projekte/<group>/_framework/` |
-| Eine Brand unter einem Framework | L6 | `Projekte/<group>/Sub/<brand>/` |
-| Einzel-Projekt (App, Website, Service) | L7 | `Projekte/<name>/` |
+### 1. Klassifikation festlegen (Anti-Halluzinations-Pflicht)
 
-**Im Zweifel:** L7 — spezifischer als globaler.
+Bevor du eine Zeile schreibst, beantworte:
+
+| Wo? | Wann? | Pfad |
+|-----|-------|------|
+| **L5 — Shop-Framework** | Es ist ein Shop in MultiBrandShops | `Projekte/MultiBrandShops/Shops/<Marke>/` |
+| **L7 — Nicht-Shop** | Es ist ein eigenstaendiges Projekt (App, Roboter, Server, Webseite, ProjectDelta-Domaene) | `Projekte/<Projekt>/` oder als Sub-Projekt unter einem L7-Eltern (`Projekte/ProjectZeta/ProjectEpsilon/`) |
+
+Im Zweifel **spezifischer**, nicht globaler. Details: Workspace-Root `CLAUDE.md`
+Klassifikations-Hierarchie und `VISION.md` Sektion 3.
 
 ### 2. Verzeichnis anlegen
 
+```powershell
+# Windows / PowerShell
+$base = "C:\Users\YourUser\.YourWorkspace\Projekte\<Projekt-Pfad>"
+New-Item -ItemType Directory -Force -Path $base | Out-Null
+```
+
 ```bash
-mkdir -p "Projekte/<name>"
-cd "Projekte/<name>"
+# Unix
+mkdir -p "Projekte/<Projekt-Pfad>"
 ```
 
-### 3. 5 Pflicht-Files erstellen
+### 3. Pflicht-Files schreiben
 
-**`CLAUDE.md`** — Projekt-spezifische Architekt-Regeln
+Alle 5 Files sind Pflicht. Nutze die Vorlagen aus dem
+`project-setup`-Skill (`~/.claude/skills/project-setup/SKILL.md`) oder schreibe
+sie nach folgendem Minimal-Aufbau:
+
+#### CLAUDE.md (Briefing fuer alle Agenten in diesem Projekt)
+
 ```markdown
-# CLAUDE.md — <Projektname>
-> Klassifikation: L<N>
+# <Projekt-Name>
 
-## Was ist dieses Projekt?
-[1-2 Saetze]
+> **L<N>-Boundary (siehe Workspace-Root `CLAUDE.md`):** Dieses Projekt liest
+> NUR <welche Verzeichnisse>. Es fasst <welche fremden Verzeichnisse> NICHT an.
 
-## Tech-Stack
-[Liste der Frameworks, Versionen, wichtige Libraries]
+<1-3 Saetze: Was ist das Projekt?>
 
-## Lokale Regeln
-[z.B. "Niemals mock-DB in Tests", "Mobile-First", "ASCII-only Doku"]
+## Docs lesen
+- `PROJECT.md` — Was ist das, Stakeholder, Hardware/Stack
+- `VISION.md` — Wo wollen wir hin (V1 / V2 / V3)
+- `STATUS.md` — Aktueller Stand
+- `SETUP.md` — Erstinbetriebnahme
 
-## Deploy
-[Wie wird das Projekt deployed? Lokal / Server / Cloud?]
+## Zugang
+<SSH, App-Logins, Credentials-Pfade — KEINE Klartext-Werte>
+
+## Modus 1: Worker — `<suffix>.audit.md` finden, abarbeiten, STATUS.md ueberschreiben, Audit loeschen
+## Modus 2: Architekt — VISION.md + STATUS.md lesen, naechstes Audit schreiben
 ```
 
-**`VISION.md`** — Wo wollen wir hin?
-```markdown
-# VISION — <Projektname>
+#### VISION.md
+- Langfrist-Ziel (1-2 Saetze)
+- V1 / V2 / V3 in der Detailtiefe nach Bedarf
+- Subprojekte-Tabelle (Feature, Status, Prio)
+- Klassifikations-Tabelle (welcher Aspekt wo gehoert)
+- Boundaries (was die Vision **nicht** regelt)
 
-## Ziel
-[Was am Ende fertig sein soll]
+#### STATUS.md
+- Stand-Datum
+- Was bisher geschehen ist
+- Was funktioniert
+- Was NICHT funktioniert / blockiert ist
+- Naechste Schritte
+- Risiko-Watchlist
+- Letzte Aenderung
+- Update-Pflicht (immer ueberschreiben, nicht anhaengen)
 
-## Nicht-Ziele
-[Was wir explizit nicht machen]
+> **STATUS-Pflicht (global):** Nach jeder Welle MUSS `STATUS.md` ueberschrieben
+> werden — kein Append, kein HANDOFF.md, kein SESSION-*. Template:
+> `_control/templates/status-template.md` (Pflicht-Sektionen: Letzte Welle /
+> Live-URLs / Offene Bugs / Naechster Schritt). Git Log ist das Archiv.
 
-## Phasen
-1. [Initial]
-2. [...]
-```
+#### PROJECT.md
+- Was ist das Projekt
+- Stakeholder-Tabelle
+- Hardware/Stack-Tabelle
+- Erfolgskriterien V1
+- Erfolgskriterien V2
+- Risiken
+- Was es **nicht** ist
+- Beziehung zu anderen Projekten
 
-**`STATUS.md`** — Wo stehen wir? (wird nach jeder Welle ueberschrieben)
-```markdown
-# Status — <Projektname>
-
-## Stand: <DATUM>
-
-## Was funktioniert
-- [...]
-
-## Was kaputt ist
-- [...]
-
-## Was zuletzt geaendert wurde
-- [...]
-
-## Naechster Schritt
-- [...]
-```
-
-**`PROJECT.md`** — Meta-Info (Stakeholder, externe Refs)
-```markdown
-# Project — <Projektname>
-
-- **Owner:** [Name]
-- **Created:** <DATUM>
-- **Repo:** [URL falls vorhanden]
-- **Live-URL:** [falls vorhanden]
-- **External Refs:** [Notion-DB, Linear-Project, Slack-Channel]
-```
-
-**`SETUP.md`** — Wie startet ein neuer Agent / Dev hier?
-```markdown
-# Setup — <Projektname>
-
-## Voraussetzungen
-- [...]
-
-## Lokal starten
-```bash
-[copy-paste-ready]
-```
-
-## Tests
-```bash
-[wie laufen Tests]
-```
-
-## Deploy
-```bash
-[wie wird gedeployed]
-```
-```
+#### SETUP.md
+- Voraussetzungen (Hard- + Software, Netzwerk)
+- Erst-Inbetriebnahme (Schritte, ggf. TBD bis Hardware da)
+- Geplante Verzeichnisstruktur
+- Credentials-Tabelle (nur Pfade!)
+- Sicherheits-Hinweise
+- Naechste Update-Trigger
 
 ### 4. Optional: Schriftbuero anlegen
 
-Bei viel User-Input + Uploads: Skill `~/.claude/skills/project-setup/SKILL.md` oder Runbook `schriftbuero-erstellen.md` ausloesen.
+Wenn das Projekt **lange laufen wird** und **viel User-Input + Uploads** braucht
+(z.B. Persona-Specs, PDFs, Server-Logs, Foto-Material), lege ein eigenes
+Schriftbuero an. Nutze dafuer:
 
-### 5. Git initialisieren
-
-```bash
-git init
-git add .
-git commit -m "init: <Projektname> bootstrap"
+```
+_runbooks/schriftbuero-erstellen.md
 ```
 
-Optional: GitHub-Repo. Account aus `CLAUDE.user.md` Sektion "GitHub":
+Bei kurzen oder sehr technischen Projekten reicht der Chat — kein Schriftbuero
+noetig.
 
-```bash
-gh repo create <ACCOUNT>/<name> --private --source=. --remote=origin --push
+### 5. Optional: GitHub-Repo anlegen
+
+Falls Code involviert: GitHub-Repo unter Account `YOUR_GITHUB_USER` erstellen.
+Schritte: `gh repo create YOUR_GITHUB_USER/<repo-name> --public|--private --source=. --remote=origin --push`.
+
+Bei Server-Deploy-Hooks: zusaetzlich Bare-Repo auf YOUR_SERVER anlegen
+(`/root/git/<name>.git`) und Deploy-Hook in `.git/hooks/post-receive`. Pattern
+siehe `Projekte/ProjectZeta/ProjectEpsilon/CLAUDE.md` und `Projekte/ProjectDelta/CLAUDE.md`.
+
+### 6. Workspace-Root-CLAUDE.md updaten
+
+In der Projekt-Tabelle eintragen:
+
+```markdown
+| <Projekt-Name> | <Pfad> | <1-Satz-Beschreibung> | AKTIV \| INAKTIV \| BLOCKIERT |
 ```
 
-### 6. Workspace-Root-CLAUDE.user.md aktualisieren
+### 7. Optional: Memory-Eintrag schreiben
 
-In `CLAUDE.user.md` Sektion "Meine Projekte" das neue Projekt eintragen.
+Wenn das Projekt eine **infrastrukturelle Eigenheit** hat, die der naechste
+Agent kennen muss (z.B. besondere Server-Pfade, ungewoehnliche Tooling-Wahl),
+lege eine Reference-Memory an:
 
-### 7. Memory-Eintrag
+```
+~/.claude/projects/<workspace-id>/memory/reference_<projekt>_infra.md
+```
 
-Falls das Projekt langfristig wichtig wird:
-- Memory-File `project_<name>.md` erstellen
-- Eintrag in `MEMORY.md`
+Eintrag in `MEMORY.md` ergaenzen. Siehe Memory-System-Doku in der
+Workspace-Root `CLAUDE.md`.
 
 ### 8. Optional: Cloud Scheduled Task
 
-Wenn das Projekt regelmaessig autonom bearbeitet werden soll:
-```
-/schedule
-```
-(Slash-Command in Claude Code)
+Wenn das Projekt regelmaessig autonom etwas tun soll (Tagging, Healthchecks,
+Reports): Skill `schedule` oder `/loop` nutzen. Max. 5x Plan: 3 Tasks/Tag, 1h Minimum.
+Verwaltung: https://claude.ai/code/scheduled.
 
 ## Verifizieren
 
-- [ ] Verzeichnis existiert mit L-Klassifikation
-- [ ] 5 Pflicht-Files vorhanden: `CLAUDE.md`, `VISION.md`, `STATUS.md`, `PROJECT.md`, `SETUP.md`
-- [ ] `git log` zeigt Initial-Commit
-- [ ] `CLAUDE.user.md` Eintrag in Projekt-Tabelle vorhanden
-- [ ] (optional) GitHub-Repo angelegt + initial push
+- [ ] Projekt-Verzeichnis existiert
+- [ ] Alle 5 Pflicht-Files sind da (`CLAUDE.md`, `VISION.md`, `STATUS.md`, `PROJECT.md`, `SETUP.md`)
+- [ ] CLAUDE.md hat L-Boundary-Hinweis korrekt fuer die Klassifikations-Ebene
+- [ ] STATUS.md hat Update-Pflicht-Hinweis und ist nicht chronologisch
+- [ ] Workspace-Root-CLAUDE.md hat den neuen Eintrag in der Projekt-Tabelle
+- [ ] Wenn Schriftbuero noetig: angelegt und in CLAUDE.md des Projekts erwaehnt
+- [ ] Wenn Code: GitHub-Repo + ggf. Bare-Repo + Deploy-Hook bestehen
+- [ ] Wenn Server-Pfade besonders: Memory-Eintrag in MEMORY.md verlinkt
+- [ ] Keine Klartext-Credentials in irgendeinem File
+
+## Run-Log
+
+> **Pflicht-Touchpoint.** Jeder Agent der dieses Runbook nutzt ergaenzt EINE Zeile — neueste oben, max 8 (aelteste raus). Outcome-Codes: `PASS` (lief glatt, nichts geaendert) · `PARTIAL` (lief, aber etwas war anders — Notiz!) · `FIX` (Runbook stimmte nicht, korrigiert) · `META` (nur am Runbook editiert, nicht ausgefuehrt). Doktrin: `CLAUDE.md` "Navigations-Doktrin", `_runbooks/struktur-navigieren.md` Sektion 6.
+
+| Datum | Agent / Welle | Outcome | Notiz (was war anders / was wurde am Runbook geaendert) |
+|-------|---------------|---------|---------------------------------------------------------|
+| 2026-05-12 | Runbook-Mitlern-Welle | META | ## Run-Log nachgeruestet (Mitlern-Standard). |
 
 ## Learnings
 
-### 5-Files-Pflicht
-Vorlaeufer-Setups hatten oft nur `README.md`. Lehre: Agents brauchen klare Trennung von Architekt-Regeln (CLAUDE.md) vs. Vision (VISION.md) vs. Live-Status (STATUS.md). Single-File wird zu lang und veraltet.
-
-### STATUS.md ueberschreiben, nicht appenden
-Wer STATUS.md anhaeuft, hat in 3 Wochen einen 500-Zeilen-Friedhof. Git-Log ist das Archiv. STATUS.md ist immer Live-Snapshot.
-
-### L-Klassifikation frueh festlegen
-Ein falsch klassifiziertes Projekt wandert spaeter mit Workspace-Move-Schmerzen. L4-L7 Entscheidung zu Beginn.
+### Mai 2026 — ProjectEpsilon Erst-Anwendung
+- Sub-Projekte (ProjectEpsilon unter Projekte/ProjectZeta/) sind L7 wie ihre Eltern, aber haben
+  eigene CLAUDE.md mit explizitem Verweis auf Eltern-Verzeichnis als read-only-Quelle.
+- Schriftbuero ist NICHT Standard — nur bei "viel User-Input + Uploads" sinnvoll.
+  Bei Kurz-Projekten lass es weg.
+- 5 Files sind das Minimum. Ein VISION.md ohne Subprojekte-Tabelle ist okay
+  fuer kleine Projekte; ein VISION.md ohne V1-Erfolgskriterien ist NICHT okay.
+- Wenn das Projekt ein Sub-Projekt ist: explizit klaeren ob das Eltern-Projekt
+  einen eigenen `_runbooks/`-Ordner braucht oder ob globale L2-Runbooks reichen.

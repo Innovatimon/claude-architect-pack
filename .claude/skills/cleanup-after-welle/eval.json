@@ -1,0 +1,44 @@
+{
+  "name": "cleanup-after-welle",
+  "version": "1.0.0",
+  "criteria": {
+    "status_md_overwrite": {
+      "weight": 0.20,
+      "description": "STATUS.md des betroffenen Projekts vollstaendig ueberschrieben mit allen Pflicht-Sektionen (Letzte Welle / Live-URLs / Final-Scores / Offene Bugs / Naechster Schritt). Kein Append."
+    },
+    "audit_files_zero": {
+      "weight": 0.15,
+      "description": "Glob `<projekt>/**/*.audit.md` ergibt 0 Files. Alle Audit-Auftraege geloescht oder Inhalt in STATUS.md aufgenommen."
+    },
+    "tot_files_archived": {
+      "weight": 0.15,
+      "description": "temp-/draft-/scratch-/HANDOFF-/SESSION-*-Files in `<projekt>/_archive/<datum>-<welle>/` verschoben. Kein Hard-Delete."
+    },
+    "memory_pflege": {
+      "weight": 0.15,
+      "description": "Bei Drift: Memory-Files updated oder Stale-Marker gesetzt. MEMORY.md Count = Filesystem-Count."
+    },
+    "schriftbuero_inbox": {
+      "weight": 0.10,
+      "description": "Schriftbuero-Inbox aufgeraeumt (alte Files archiviert, INDEX-Phantom-Check, User-Folge-Wuensche extrahiert vor Erledigt-Markierung)."
+    },
+    "master_state_sync": {
+      "weight": 0.10,
+      "description": "MASTER-STATE.md / OPEN-ITEMS.md syncen wenn vorhanden. Drift zwischen Projekt-STATUS und Root-State erkannt + gefixt."
+    },
+    "git_status_clean": {
+      "weight": 0.10,
+      "description": "git status sauber ODER erwarteter Welle-Commit (`welle: <id> — <kurz-outcome>`) lokal. Push nur wenn explizit Teil der Welle."
+    },
+    "bericht_im_chat": {
+      "weight": 0.05,
+      "description": "Kurz-Bericht im Chat (max 8 Zeilen) mit allen 8 Schritten quittiert."
+    }
+  },
+  "scoring": "Pro Run: 0.0-1.0 pro Kriterium. Aggregierter Score = Summe(weight*score). Threshold PASS >= 0.85.",
+  "thresholds": {
+    "pass": 0.85,
+    "warn": 0.70,
+    "fail_below": 0.70
+  }
+}

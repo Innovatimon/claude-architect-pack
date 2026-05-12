@@ -86,7 +86,7 @@ Pro File in `user_owned`: **nichts tun**, nicht anfassen.
 ```bash
 SKILLS_DIR="$(jq -r '.skills_dir' ~/claude-architect-pack/.install-config.json)"
 
-for skill in autonomous-execution audit-creator audit-worker cleanup-after-welle project-setup init-architect-pack update-architect-pack; do
+for skill in autonomous-execution audit-creator audit-worker cleanup-after-welle project-setup bootstrapNewProject generateProjectDataMap heartbeatWorkspace init-architect-pack update-architect-pack; do
   cp -r "$HOME/claude-architect-pack/.claude/skills/$skill" "$SKILLS_DIR/"
 done
 ```

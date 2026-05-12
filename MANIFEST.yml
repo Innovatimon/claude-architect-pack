@@ -7,7 +7,7 @@
 
 version: 1
 schema: claude-architect-pack
-last_updated: 2026-05-11
+last_updated: 2026-05-12
 
 # Files die der Updater immer ueberschreibt (Template-Stand ist Wahrheit)
 template_managed:
@@ -17,6 +17,7 @@ template_managed:
   # Alle Runbooks werden gepflegt
   - _runbooks/INDEX.md
   - _runbooks/agent-initialisierung.md
+  - _runbooks/struktur-navigieren.md
   - _runbooks/runbook-erstellen.md
   - _runbooks/user-anleitungen-erstellen.md
   - _runbooks/welle-orchestration.md
@@ -33,13 +34,20 @@ template_managed:
   - _control/CLAUDE.md
   - _control/templates/status-template.md
   - _control/templates/audit-template.md
+  - _control/templates/runbook-template.md
+  - _control/templates/vision-template.md
+  - _control/templates/handoff-template.md
+  - _control/templates/data_map_template.html
 
-  # Skills (im Claude-Skill-Dir, nicht im Workspace)
-  - skills/autonomous-execution/SKILL.md
-  - skills/audit-creator/SKILL.md
-  - skills/audit-worker/SKILL.md
-  - skills/cleanup-after-welle/SKILL.md
-  - skills/project-setup/SKILL.md
+  # Skills (im Claude-Skill-Dir, nicht im Workspace) — je: SKILL.md + eval.json + learnings.md + context/handoff.md
+  - skills/autonomous-execution/
+  - skills/audit-creator/
+  - skills/audit-worker/
+  - skills/cleanup-after-welle/
+  - skills/project-setup/
+  - skills/bootstrapNewProject/
+  - skills/generateProjectDataMap/
+  - skills/heartbeatWorkspace/
   - skills/init-architect-pack/SKILL.md
   - skills/update-architect-pack/SKILL.md
 
@@ -63,7 +71,11 @@ user_owned:
   - projects/**
 
   # User-eigene Skills (die nicht aus diesem Pack stammen)
-  - .claude/skills/* # ausser den 7 aus template_managed (Update prueft Name)
+  - .claude/skills/* # ausser den aus template_managed (Update prueft Name)
+
+  # thinkLikeUser ist user-owned: das Pack liefert nur das Geruest,
+  # die context/-Files (Persona-Substanz) sind privat und gehoeren dem User
+  - .claude/skills/thinkLikeUser/context/**
 
 # Diese Files duerfen aus dem Workspace komplett verschwinden wenn Update
 # sie aus dem Template entfernt (Cleanup von Legacy-Files):

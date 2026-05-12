@@ -1,0 +1,36 @@
+{
+  "name": "audit-worker",
+  "version": "1.0.0",
+  "criteria": {
+    "phasen_completeness": {
+      "weight": 0.30,
+      "description": "Alle Phasen aus PHASEN-EXEKUTION abgearbeitet, keine uebersprungen, jede mit Resultat dokumentiert."
+    },
+    "crucible_pass": {
+      "weight": 0.25,
+      "description": "Alle THE CRUCIBLE Tests ausgefuehrt, Output gezeigt, alle PASS (oder Blocker dokumentiert)."
+    },
+    "build_zero_bug": {
+      "weight": 0.15,
+      "description": "Zero-Bug-Policy: Build/Lint/TypeCheck fehlerfrei vor Commit. Kein 'wir fixen das spaeter'."
+    },
+    "status_md_quality": {
+      "weight": 0.15,
+      "description": "STATUS.md ueberschrieben mit Pflicht-Sektionen (Stand / Letztes Audit / Funktioniert / Kaputt / Geaendert / Naechster Schritt) gemaess _control/templates/status-template.md."
+    },
+    "cleanup_audit_file": {
+      "weight": 0.10,
+      "description": "[suffix].audit.md geloescht nach Abschluss. Kein Resterhalt."
+    },
+    "git_commit_quality": {
+      "weight": 0.05,
+      "description": "Aussagekraeftige Commit-Message mit Welle-/Audit-Bezug, kein 'wip' oder 'updates'."
+    }
+  },
+  "scoring": "Pro Run: 0.0-1.0 pro Kriterium. Aggregierter Score = Summe(weight*score). Threshold PASS >= 0.85.",
+  "thresholds": {
+    "pass": 0.85,
+    "warn": 0.70,
+    "fail_below": 0.70
+  }
+}

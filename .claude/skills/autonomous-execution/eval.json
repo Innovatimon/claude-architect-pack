@@ -1,0 +1,36 @@
+{
+  "name": "autonomous-execution",
+  "version": "1.0.0",
+  "criteria": {
+    "loop_completeness": {
+      "weight": 0.25,
+      "description": "Plan -> Build -> Test -> Commit -> Deploy -> Verify -> Cleanup -Schleife komplett durchlaufen bis Vision/Anweisung erfuellt ist."
+    },
+    "stop_point_correctness": {
+      "weight": 0.20,
+      "description": "Stop NUR bei echten Stop-Punkten (Credential, Webseiten-Login, Bezahlung, Hardware, strategische Entscheidung). Kein vorzeitiges Nachfragen."
+    },
+    "user_anleitung_quality": {
+      "weight": 0.15,
+      "description": "Bei Stop: User-Anleitung in `_schriftbuero/User-Anleitungen/ACT-YYYY-MM-DD-NNN.md` mit klarem Naechster-Schritt."
+    },
+    "live_verifikation": {
+      "weight": 0.20,
+      "description": "Live-Verifikation Pflicht (curl / BUILD_ID / Smoke). Behauptung ohne Beweis ist verboten."
+    },
+    "cleanup_after_welle": {
+      "weight": 0.10,
+      "description": "Nach jeder Welle Cleanup angestossen (Tot-Files weg, Audit-Files loeschen, STATUS.md ueberschreiben, Memory pflegen)."
+    },
+    "doku_klassifikation": {
+      "weight": 0.10,
+      "description": "L1-L7-Hierarchie respektiert. Skill-Konvention richtig angewandt (Skill / Runbook / CLAUDE.md / Memory)."
+    }
+  },
+  "scoring": "Pro Run: 0.0-1.0 pro Kriterium. Aggregierter Score = Summe(weight*score). Threshold PASS >= 0.85.",
+  "thresholds": {
+    "pass": 0.85,
+    "warn": 0.70,
+    "fail_below": 0.70
+  }
+}

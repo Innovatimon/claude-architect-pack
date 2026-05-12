@@ -1,100 +1,101 @@
-# MASTER AUDIT: [ID] — [Titel]
+# MASTER AUDIT: [PREFIX]-[NAME]-[NR] — [Titel]
 
-> Agent: Claude Code (im [ordner]/ Ordner oeffnen)
-> Suffix: [name].audit.md
-> Erstellt: YYYY-MM-DD
-> Erstellt-von: [Architekt | Orchestrator | <agent-name>]
-
-## [MISSION OBJECTIVE]
-
-> Was am Ende existieren / funktionieren MUSS. Konkret, messbar.
-
-- Konkretes Ergebnis 1 (z.B. "Route `/api/widgets` antwortet 200 mit gueltigem JSON")
-- Konkretes Ergebnis 2
-- Konkretes Ergebnis 3
-
-## [PHASEN-EXEKUTION]
-
-### Phase 1: <Name>
-
-**Was:** <Kurz-Beschreibung>
-
-**Schritte:**
-1. <Schritt mit copy-paste-Befehl oder Datei-Pfad>
-2. <Schritt>
-3. <Schritt>
-
-**Erfolgskriterium Phase 1:**
-- [ ] <Pruefbares Ergebnis>
-
-### Phase 2: <Name>
-...
-
-## [THE ARCHITECT'S PRIDE]
-
-> Qualitaetsansprueche. Was NICHT akzeptabel ist.
-
-- **NICHT akzeptabel:** <Anti-Muster 1>
-- **NICHT akzeptabel:** <Anti-Muster 2>
-- **Best Practice:** <Konvention die einzuhalten ist>
-- **Performance:** <Schwellen die nicht ueberschritten werden duerfen>
-
-## [THE CRUCIBLE]
-
-> Bash / curl / Test-Skripte die PASS / FAIL anzeigen. Copy-paste-ready.
-
-```bash
-# Test 1: Build erfolgreich
-<build-command>
-# erwartet: exit 0, keine Errors
-
-# Test 2: Route 200
-curl -sL -o /dev/null -w 'HTTP %{http_code}\n' <url>
-# erwartet: HTTP 200
-
-# Test 3: ...
-```
-
-**Alle Tests muessen PASS sein vor Commit.**
-
-## [DEPLOYMENT & HANDOFF]
-
-### Git Commit
-
-```bash
-git add <SPEZIFISCHE-FILES>   # nicht "git add -A"
-git commit -m "<feat|fix|refactor>: <kurz-summary>
-
-<optional body>
-"
-```
-
-### STATUS.md ueberschreiben
-
-```
-<projekt>/STATUS.md
-```
-
-Template: `_control/templates/status-template.md`. Pflicht-Sektionen:
-- Stand
-- Letzte Welle
-- Live-URLs / Endpoints
-- Offene P0/P1
-- Naechster Schritt
-- History
-
-### Audit-File loeschen
-
-```bash
-rm <projekt>/<id>.audit.md
-```
-
-### Optional: Externe Quelle aktualisieren
-
-Wenn aus Notion/Linear/Issue gekommen, **NUR nach Reviewer-PASS**:
-- Status auf "Erledigt"
-- Inline-Outcome-Kommentar mit Commit-Hash + Live-URL
+> **Agent:** Claude Code (YourWorkspace Terminal)
+> **Zugang:** [SSH/lokal/beides]
+> **Skill:** /mnt/skills/user/audit-worker/SKILL.md
+> **Persona-Pflicht:** `Aktiviere Skill thinkLikeUser sofort. Working Directory: C:\Users\YourUser\.YourWorkspace\.` (Pfad: `~/.claude/skills/thinkLikeUser/`) — vor allem anderen!
+> **Suffix:** [name].audit.md / [name].handoff.md
+> **Datum:** [ISO 8601]
+> **Auto Mode:** Ja
+> **Agent Teams:** [Ja/Nein — wenn ja, Teammates beschreiben + thinkLikeUser-Prefix in jedem Sub-Prompt]
 
 ---
 
-> Audit-File loeschen ist Pflicht. Git-Log ist das Archiv.
+## [MISSION OBJECTIVE]
+
+Am Ende dieses Audits existiert:
+
+1. [Konkrete Ergebnisse auflisten]
+2. [Jedes Ergebnis muss pruefbar sein]
+3. [Keine vagen Formulierungen]
+
+---
+
+## [PHASEN-EXEKUTION]
+
+### Phase 1: [Titel]
+
+**Ziel:** [Was diese Phase erreicht]
+
+```bash
+# Konkrete Befehle
+```
+
+- [ ] Schritt 1
+- [ ] Schritt 2
+- [ ] Schritt 3
+
+### Phase 2: [Titel]
+
+**Ziel:** [Was diese Phase erreicht]
+
+```bash
+# Konkrete Befehle
+```
+
+- [ ] Schritt 1
+- [ ] Schritt 2
+
+### Phase 3: [Titel]
+
+**Ziel:** [Was diese Phase erreicht]
+
+- [ ] Schritt 1
+- [ ] Schritt 2
+
+---
+
+## [THE ARCHITECT'S PRIDE]
+
+Qualitaetsansprueche fuer diesen Audit:
+
+- [ ] Zero-Bug-Policy: Build fehlerfrei
+- [ ] Kein auskommentierter Code
+- [ ] Keine .bak/.old/.orig Dateien
+- [ ] Keine verwaisten Dateien
+- [ ] [Projekt-spezifische Qualitaetsansprueche]
+
+---
+
+## [THE CRUCIBLE]
+
+Tests die bestehen MUESSEN bevor der Audit als abgeschlossen gilt:
+
+```bash
+# Build Test
+[build command]
+
+# Lint Test
+[lint command]
+
+# Unit Tests
+[test command]
+
+# Integration Tests
+[test command]
+```
+
+- [ ] Build: PASS
+- [ ] Lint: PASS
+- [ ] Tests: PASS
+- [ ] [Manuelle Checks]
+
+---
+
+## [DEPLOYMENT & HANDOFF]
+
+1. Alle Aenderungen committen
+2. Deploy: [deploy command]
+3. Verify: [verification steps]
+4. [suffix].handoff.md ueberschreiben mit Ergebnissen
+5. [suffix].audit.md LOESCHEN

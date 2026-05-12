@@ -1,0 +1,12 @@
+{
+  "name": "generateProjectDataMap",
+  "criteria": {
+    "html_valid": {"weight": 0.25, "description": "Generiertes HTML ist W3C-valid und oeffnet ohne Fehler im Browser"},
+    "self_contained": {"weight": 0.20, "description": "Keine externen URLs (Fonts, CSS, JS), 100% offline-funktional"},
+    "drei_spalten_sauber": {"weight": 0.20, "description": "Pantry/Prep/Plate visuell getrennt, lesbar, mobile-tauglich"},
+    "extraktion_korrekt": {"weight": 0.20, "description": "Items aus Projekt-Doku korrekt einsortiert, keine Halluzination"},
+    "speicherort_korrekt": {"weight": 0.10, "description": "Datei liegt unter _control/projects/<name>/data_map.html"},
+    "umlaut_compliance": {"weight": 0.05, "description": "Echte Umlaute im HTML (User-Browser-Output)"}
+  },
+  "scoring": "0-1 pro Kriterium. Total = Summe(weight*score)."
+}

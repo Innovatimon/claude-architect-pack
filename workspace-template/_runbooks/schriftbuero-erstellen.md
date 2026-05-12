@@ -1,128 +1,174 @@
-# Runbook: Schriftbuero anlegen
+# Runbook: Schriftbuero fuer ein Projekt anlegen
 > Klassifikation: L2
+> Stand: 2026-05-12
 
-> **Trigger:** "Schriftbuero anlegen", "User-Kommunikations-Layer", "Inbox + Briefings", "wir brauchen einen Ort fuer Uploads und Fragen"
+> **Trigger:** "Schriftbuero anlegen", "Schriftbuero fuer <Projekt>", "ich brauche Inbox + Briefings", "User-Kommunikations-Layer", "wir brauchen einen Ort fuer Uploads und Fragen"
 
-## Was ist ein Schriftbuero?
+## Kontext
 
-Ein Verzeichnis-Pattern fuer **strukturierte User-Agent-Kommunikation**.
-Statt allem im Chat verstreut zu lassen, lebt es in 6 Ordnern:
+Ein Schriftbuero ist die persistente schriftliche Kommunikations-Schicht zwischen
+User (Owner) und Architekt (Claude). Es ist sinnvoll, wenn ein Projekt
+**lange laeuft, viel User-Input braucht und Material persistiert werden muss**
+(PDFs, Persona-Specs, Server-Logs, Fotos).
 
+Erste Anwendung: `Projekte/MultiBrandShops/_schriftbuero/`. Zweite Anwendung:
+`Projekte/ProjectZeta/ProjectEpsilon/_schriftbuero/`. Beide haben dieselbe Struktur.
+
+## Wann brauche ich kein Schriftbuero?
+
+- Kurz-Projekte (Bug-Fix, einmaliger Setup, Migration).
+- Rein technische Projekte ohne User-Input-Bedarf (Server-Patch, Doku-Aufraeumen).
+- Wenn der Chat als Single-Source-of-Truth voll reicht.
+
+Wenn du unsicher bist: **lass es weg, nachruesten ist trivial**. Erst wenn klar
+wird, dass Wissen verloren geht oder der User Material liefern muss, lege es an.
+
+## Schritte
+
+### 1. Klassifikation festlegen
+
+| Aspekt | Antwort |
+|--------|---------|
+| Schriftbuero-Verzeichnis-Ort | `<Projekt>/_schriftbuero/` (im Projekt selbst, nicht global) |
+| Zugriff fuer Sub-Agenten | read-only, ausser explizit im Audit erlaubt |
+| Schriftbuero-Pattern (das Konzept) | L2 (gilt fuer alle Projekte, dieses Runbook hier) |
+
+### 2. Verzeichnis-Skelett anlegen
+
+```powershell
+# Windows / PowerShell
+$base = "C:\Users\YourUser\.YourWorkspace\Projekte\<Projekt-Pfad>\_schriftbuero"
+foreach ($d in @("Templates","Inbox","Briefings","Fragenkataloge","Antworten","Kontinuitaet")) {
+  New-Item -ItemType Directory -Force -Path "$base\$d" | Out-Null
+}
 ```
-_schriftbuero/
-  Templates/            # Vorlagen fuer User-Anleitungen, Briefings
-  Inbox/                # User-Uploads, Screenshots, Doku-Snippets
-  Briefings/            # Agent → User: Statusberichte, Vorschlaege
-  Fragenkataloge/       # Agent → User: Klarstellungsfragen-Listen
-  Antworten/            # User → Agent: Antworten auf Briefings/Fragen
-  Kontinuitaet/         # Session-Continuation: Initiator-Dokumente
-  User-Anleitungen/     # ACT-* Files (siehe user-anleitungen-erstellen.md)
-  MASTER-ACTIONS.md     # Index aller offenen ACT-Files
-```
-
-## Wann ein Schriftbuero anlegen?
-
-- Projekt mit viel User-Input (Uploads, Screenshots, externe Doku)
-- Projekt mit vielen Stop-Punkten (User-Aktionen, Credentials)
-- Projekt das ueber mehrere Sessions laeuft (Kontinuitaet wichtig)
-- Workspace-Root: ja, wenn man mehrere Projekte hat
-- Pro-Projekt: ja wenn das spezifische Projekt komplex ist
-
-**Kein Schriftbuero:** Single-File-Hacks, One-Shot-Skripte, triviale Projekte.
-
-## Schritt-fuer-Schritt
-
-### 1. Pfad festlegen
-
-| Scope | Pfad |
-|-------|------|
-| Workspace-Global | `<workspace-root>/_schriftbuero/` |
-| Pro Projekt | `<workspace-root>/Projekte/<name>/_schriftbuero/` |
-
-### 2. Verzeichnis-Struktur anlegen
 
 ```bash
-SB="<schriftbuero-pfad>"
-mkdir -p "$SB/Templates" "$SB/Inbox" "$SB/Briefings" "$SB/Fragenkataloge" "$SB/Antworten" "$SB/Kontinuitaet" "$SB/User-Anleitungen"
+# Unix
+mkdir -p "<Projekt>/_schriftbuero"/{Templates,Inbox,Briefings,Fragenkataloge,Antworten,Kontinuitaet}
 ```
 
-### 3. README.md im Schriftbuero
+### 3. README schreiben
 
-```markdown
-# Schriftbuero — <Scope>
+`<Projekt>/_schriftbuero/README.md` erklaert das Konzept und den Workflow fuer
+User + Agenten. Pattern: siehe
+`Projekte/ProjectZeta/ProjectEpsilon/_schriftbuero/README.md` (oder
+`Projekte/MultiBrandShops/_schriftbuero/README.md` fuer Multi-Projekt-Variante).
 
-> User-Agent-Kommunikations-Layer.
+Pflicht-Sektionen:
+- "Was ist das?" (drei Bullets: Inbox, Briefings, Fragenkataloge)
+- Verzeichnis-Tabelle
+- Workflow fuer den User (A. Upload, B. Fragenkatalog beantworten, C. Stand checken)
+- Workflow fuer den Architekt (Wann was schreiben?)
+- Anti-Halluzinations-Regel fuer Sub-Agents
+- Pflege-Hinweis am Ende
 
-## Ordner
+### 4. Templates kopieren
 
-| Ordner | Wer fuellt | Was rein |
-|--------|------------|----------|
-| `Inbox/` | User | Uploads, Screenshots, externe Doku |
-| `Briefings/` | Agent | Statusberichte, Vorschlaege (`BRIEF-YYYY-MM-DD-NNN.md`) |
-| `Fragenkataloge/` | Agent | Klarstellungsfragen (`FRAGEN-YYYY-MM-DD-NNN.md`) |
-| `Antworten/` | User | Antworten auf Briefings/Fragen (Inline-Format) |
-| `Kontinuitaet/` | Agent | Initiator-Dokumente fuer Session-Uebergabe |
-| `User-Anleitungen/` | Agent | ACT-Files (siehe Runbook `user-anleitungen-erstellen.md`) |
-| `Templates/` | Agent | Pflege-Templates fuer alle obigen |
-| `MASTER-ACTIONS.md` | Agent | Index aller offenen ACT-Files |
-```
+5 Template-Files in `Templates/`:
 
-### 4. Templates anlegen
+- `Briefing-Template.md` — Architekt → User Statusbericht
+- `Fragenkatalog-Template.md` — Architekt → User strukturierte Fragen
+- `Antwort-Template.md` — User → Architekt Antworten
+- `Initiator-Template.md` — Pflicht-Lektuere fuer naechsten Agent
+- `Inbox-Eintrag-Template.md` — Begleitnotiz fuer User-Uploads
 
-**`Templates/briefing-template.md`** — Agent → User
-**`Templates/fragenkatalog-template.md`** — Agent → User
-**`Templates/anleitung-template.md`** — Agent → User (ACT-Format)
-**`Templates/kontinuitaet-template.md`** — Session-Uebergabe
+Kopiere die Vorlagen aus
+`Projekte/ProjectZeta/ProjectEpsilon/_schriftbuero/Templates/` und passe das `projekt:`-Frontmatter-Feld an.
 
-Inhalte siehe Skill `~/.claude/skills/project-setup/SKILL.md` oder generiere generische Templates.
+### 5. Inbox/README schreiben
 
-### 5. MASTER-ACTIONS.md (Initial)
+`<Projekt>/_schriftbuero/Inbox/README.md` ist die User-Anleitung fuer Uploads:
+- Welche Datei-Typen sind okay?
+- Naming-Konvention `YYYY-MM-DD-thema.<ext>`
+- Begleitnotiz-Pattern (parallele .md mit gleichem Praefix)
+- Vertraulichkeit (keine Klartext-Credentials!)
+- Was passiert nach Upload?
+- URGENT-Praefix fuer dringende Sachen
 
-```markdown
-# Master-Actions — <Scope>
+Pattern: siehe `Projekte/ProjectZeta/ProjectEpsilon/_schriftbuero/Inbox/README.md`.
 
-> Index aller offenen User-Aktionen (ACT-Files).
+### 6. Erstes Briefing schreiben
 
-| ID | Topic | Prio | Status | Pfad |
-|----|-------|------|--------|------|
+Sofort nach dem Schriftbuero-Setup ein erstes Briefing in `Briefings/` ablegen:
+`<datum>-Welle-1-Bericht.md`. Inhalt:
+- Drei-Saetze-Zusammenfassung
+- Was haben wir geliefert?
+- Wieso?
+- Was kam ueberraschend?
+- Was kann der User jetzt tun?
 
-> Aktuell keine offenen Aktionen.
-```
+Damit weiss der User sofort, dass das Schriftbuero produktiv ist.
 
-### 6. .gitkeep fuer leere Ordner
+### 7. Ersten Initiator schreiben
 
-```bash
-touch "$SB/Inbox/.gitkeep" "$SB/Briefings/.gitkeep" "$SB/Fragenkataloge/.gitkeep" "$SB/Antworten/.gitkeep" "$SB/Kontinuitaet/.gitkeep" "$SB/User-Anleitungen/.gitkeep"
-```
+`Kontinuitaet/<datum>-Welle-1-Initiator.md` mit:
+- "In 30 Sekunden" (3 Bullets)
+- "In 5 Minuten" (Welle-Status, Audits, Worker, offene Fragen)
+- "In 30 Minuten" (Pflicht-Lektuere, Optional-Lektuere)
+- "Naechster sinnvoller Schritt"
+- "Was darfst du NICHT?" (Boundaries)
+- Risiko-Liste
 
-### 7. CLAUDE.md (Workspace oder Projekt) erweitern
+So kann ein neuer Agent nach Terminal-Neustart in 5 Minuten produktiv weitermachen.
 
-In der relevanten `CLAUDE.md` einen Verweis auf das Schriftbuero ergaenzen:
+### 8. Ersten Fragenkatalog schreiben (wenn User-Input ansteht)
+
+Wenn User-Entscheidungen offen sind: `Fragenkataloge/Q1-<thema>.md`. Pattern:
+- 5-20 Fragen, gruppiert in Kategorien (A, B, C, ...)
+- Pro Frage: `frage`, `typ`, `optionen`, `begruendung`, `default_arch`, `antwort`, `user_status`
+- Antwort-Typen: single-choice, multi-select, free-text, yes-no, numeric, prio-ranking
+
+### 9. Im Projekt-CLAUDE.md verweisen
+
+`<Projekt>/CLAUDE.md` muss eine Sektion "## Schriftbuero" haben:
 
 ```markdown
 ## Schriftbuero
-
-User-Agent-Kommunikation lebt in `_schriftbuero/`.
-- User-Uploads: `_schriftbuero/Inbox/`
-- Pending Actions: `_schriftbuero/MASTER-ACTIONS.md`
-- Briefings + Fragenkataloge: `_schriftbuero/Briefings/`, `Fragenkataloge/`
+Dieses Projekt hat ein eigenes Schriftbuero unter `_schriftbuero/`.
+Der User legt Uploads in `Inbox/` ab.
+Der Architekt erstellt Briefings, Fragenkataloge und Initiatoren.
+Pattern siehe `_runbooks/schriftbuero-erstellen.md` und `_schriftbuero/README.md`.
 ```
+
+### 10. Inbox erst-Cleanup planen
+
+Setze in deine Memory eine Notiz: nach 4 Wochen Inbox-Cleanup pruefen
+(`Inbox/` → `Inbox/_archiv/<jahr>/`). Dieser Schritt ist nicht akut, aber
+gehoert zur langfristigen Hygiene.
 
 ## Verifizieren
 
-- [ ] 7 Unterordner + `MASTER-ACTIONS.md` existieren
-- [ ] `README.md` im Schriftbuero
-- [ ] 4 Templates vorhanden
-- [ ] CLAUDE.md verweist auf Schriftbuero
-- [ ] git status zeigt neue Files (`.gitkeep` etc.)
+- [ ] `<Projekt>/_schriftbuero/` existiert mit allen 6 Unterordnern
+- [ ] README.md in `_schriftbuero/` und in `_schriftbuero/Inbox/` existieren
+- [ ] 5 Templates in `Templates/` vorhanden
+- [ ] Erstes Briefing in `Briefings/` liegt vor
+- [ ] Erster Initiator in `Kontinuitaet/` liegt vor
+- [ ] (Optional) Erster Fragenkatalog in `Fragenkataloge/`
+- [ ] `<Projekt>/CLAUDE.md` verweist im Schriftbuero-Sektion auf `_schriftbuero/README.md`
+- [ ] Keine Klartext-Credentials, nirgendwo
+
+## Run-Log
+
+> **Pflicht-Touchpoint.** Jeder Agent der dieses Runbook nutzt ergaenzt EINE Zeile — neueste oben, max 8 (aelteste raus). Outcome-Codes: `PASS` (lief glatt, nichts geaendert) · `PARTIAL` (lief, aber etwas war anders — Notiz!) · `FIX` (Runbook stimmte nicht, korrigiert) · `META` (nur am Runbook editiert, nicht ausgefuehrt). Doktrin: `CLAUDE.md` "Navigations-Doktrin", `_runbooks/struktur-navigieren.md` Sektion 6.
+
+| Datum | Agent / Welle | Outcome | Notiz (was war anders / was wurde am Runbook geaendert) |
+|-------|---------------|---------|---------------------------------------------------------|
+| 2026-05-12 | Runbook-Mitlern-Welle | META | ## Run-Log nachgeruestet (Mitlern-Standard). |
 
 ## Learnings
 
-### 6-Ordner-Struktur ist Minimum
-Weniger -> Files verstreuen sich. Mehr -> User verliert Uebersicht.
-
-### Inline-Antworten gewinnen
-Statt User soll im Chat antworten: User schreibt direkt in `Antworten/` oder am Ende der `User-Anleitungen/ACT-*.md`. Naechster Agent sieht alles strukturiert.
-
-### Kontinuitaet ist wichtig fuer Sessions ueber Tage
-Initiator-Dokument am Anfang jeder neuen Session beschreibt: wo stehen wir, was offen, naechste Schritte. Verhindert "ich muss mich erstmal einlesen"-Sessions.
+### Mai 2026 — ProjectEpsilon Schriftbuero
+- **Pattern wiederverwendbar.** MultiBrandShops-Schriftbuero und ProjectEpsilon-Schriftbuero
+  sind strukturell identisch. Beim dritten Projekt einfach copy-paste-anpassen.
+- **Inbox-README ist Pflicht.** Ohne Anleitung wirft der User Files mit
+  unklarer Naming-Konvention rein. Mit Anleitung sind die Datei-Namen
+  sortier- und auffindbar.
+- **Initial-Briefing erst nach Sub-Agenten-Output.** Wenn parallel SDK-Studien
+  laufen, lohnt sich, das Briefing erst nach Eingang der Sub-Agenten-Berichte
+  zu schreiben — sonst muss man es zweimal schreiben.
+- **Ein Briefing pro Welle.** Niemals zwei Themen in einem Briefing mischen
+  — der User kann sonst nicht entscheiden welche Aktion zu welcher Frage gehoert.
+- **Schriftbuero ersetzt nicht Memory.** Memory ist projekt-uebergreifend,
+  Schriftbuero ist projekt-lokal. Manche Sachen gehoeren in beides — z.B.
+  Server-Pfad-Aenderungen ins Memory + ins Schriftbuero.

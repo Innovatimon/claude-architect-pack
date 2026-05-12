@@ -1,0 +1,36 @@
+{
+  "name": "audit-creator",
+  "version": "1.0.0",
+  "criteria": {
+    "vollstaendigkeit": {
+      "weight": 0.25,
+      "description": "Alle offenen Notion-Notizen wurden erfasst, gelesen und einem Projekt zugeordnet (keine vergessenen Items)."
+    },
+    "audit_qualitaet": {
+      "weight": 0.20,
+      "description": "Jedes generierte Audit folgt 5-Sektionen-Format (MISSION OBJECTIVE / PHASEN-EXEKUTION / ARCHITECT'S PRIDE / CRUCIBLE / DEPLOYMENT & HANDOFF) mit konkreten Befehlen statt vager Hinweise."
+    },
+    "verifikation_coverage": {
+      "weight": 0.20,
+      "description": "Jede CRUCIBLE-Sektion enthaelt ausfuehrbare Live-Tests (Build, Routes, Smoke). Keine Placebo-Checks."
+    },
+    "live_verifikation": {
+      "weight": 0.15,
+      "description": "Nach Worker-Run BUILD_ID/Smoke/curl gegen das Live-System gelaufen, Beweise im Bericht."
+    },
+    "cleanup": {
+      "weight": 0.10,
+      "description": "Audit-Files geloescht, STATUS.md ueberschrieben, Notion-Inline-Kommentare gesetzt + Final-Callout vorhanden."
+    },
+    "umlaut_compliance": {
+      "weight": 0.10,
+      "description": "Umlaut-Pflicht eingehalten: User-facing/UI/Notion-Kommentare echte Umlaute, interne Audit-Doku ASCII."
+    }
+  },
+  "scoring": "Pro Run: 0.0-1.0 pro Kriterium. Aggregierter Score = Summe(weight*score). Threshold PASS >= 0.85.",
+  "thresholds": {
+    "pass": 0.85,
+    "warn": 0.70,
+    "fail_below": 0.70
+  }
+}

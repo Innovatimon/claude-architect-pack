@@ -1,0 +1,40 @@
+{
+  "name": "project-setup",
+  "version": "1.0.0",
+  "criteria": {
+    "klassifikation_correct": {
+      "weight": 0.20,
+      "description": "L1-L7-Klassifikation korrekt (L5 vs L7 nicht verwechselt). Sub-Projekt erbt L-Klasse vom Eltern."
+    },
+    "five_files_present": {
+      "weight": 0.30,
+      "description": "Alle 5 Pflicht-Files angelegt: CLAUDE.md, VISION.md, STATUS.md, PROJECT.md, SETUP.md. Jedes mit minimal sinnvollem Inhalt (kein Leer-Template)."
+    },
+    "status_template_compliance": {
+      "weight": 0.15,
+      "description": "STATUS.md folgt kanonischem Template `_control/templates/status-template.md` (Pflicht-Sektionen: Letzte Welle / Live-URLs / Final-Scores / Offene Bugs / Naechster Schritt)."
+    },
+    "github_repo_setup": {
+      "weight": 0.10,
+      "description": "Falls Repo gewuenscht: GitHub-Repo unter YOUR_GITHUB_USER-Account angelegt, gh-auth korrekt, initial-Commit pushed."
+    },
+    "root_claude_md_update": {
+      "weight": 0.10,
+      "description": "Root-`CLAUDE.md` Tabelle 'Alle Projekte' um neuen Eintrag erweitert (Projekt / Ordner / Was-es-ist / Status)."
+    },
+    "memory_eintrag": {
+      "weight": 0.10,
+      "description": "Memory-File angelegt (`project_<name>.md` oder `reference_<name>_*.md`) + MEMORY.md-Pointer-Eintrag."
+    },
+    "credentials_separation": {
+      "weight": 0.05,
+      "description": "Keine Credentials in Docs — nur Pfade auf `_control/credentials-map.md`."
+    }
+  },
+  "scoring": "Pro Run: 0.0-1.0 pro Kriterium. Aggregierter Score = Summe(weight*score). Threshold PASS >= 0.85.",
+  "thresholds": {
+    "pass": 0.85,
+    "warn": 0.70,
+    "fail_below": 0.70
+  }
+}

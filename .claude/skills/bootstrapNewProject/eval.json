@@ -1,0 +1,12 @@
+{
+  "name": "bootstrapNewProject",
+  "criteria": {
+    "interview_vollstaendig": {"weight": 0.25, "description": "Alle 8 Fragen wurden gestellt + User-Antwort dokumentiert"},
+    "files_korrekt": {"weight": 0.20, "description": "5 Pflicht-Files + 4 Brand-Context-Files + data_map.html erstellt"},
+    "klassifikation_korrekt": {"weight": 0.15, "description": "L5/L7 korrekt zugeordnet, richtiger Pfad"},
+    "todos_markiert": {"weight": 0.15, "description": "Bei unklaren Antworten 'TODO: User klaeren' statt Halluzination"},
+    "memory_eintrag": {"weight": 0.10, "description": "project_<name>.md + MEMORY.md aktualisiert"},
+    "umlaut_compliance": {"weight": 0.15, "description": "User-facing Files mit echten Umlauten"}
+  },
+  "scoring": "0-1 pro Kriterium. Total = Summe(weight*score)."
+}
